@@ -42,7 +42,7 @@ a{color:inherit}
 .tour h2{font-size:clamp(24px,6vw,30px);line-height:1.15;letter-spacing:-.8px;color:var(--pink-dark);margin:0 0 9px}
 .tour-desc{font-size:14px;line-height:1.55;color:#7d5970;margin:0}
 .tour-list{padding:0;margin:0;list-style:none;display:grid;gap:10px}
-.tour-stop{display:flex;align-items:center;gap:13px;background:#fff8fc;border:1px solid #f9e2ef;border-radius:18px;padding:11px 14px}
+.tour-stop[hidden]{display:none!important}.tour-stop{display:flex;align-items:center;gap:13px;background:#fff8fc;border:1px solid #f9e2ef;border-radius:18px;padding:11px 14px}
 .tour-date{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;width:64px;min-height:64px;background:white;border:1px solid #f5d9e9;border-radius:14px;color:var(--pink-dark);font-weight:900}
 .tour-day{font-size:25px;line-height:1;letter-spacing:-.7px}.tour-month{font-size:11px;line-height:1.3;letter-spacing:1.2px;margin-top:5px}
 .tour-info{min-width:0;flex:1}.tour-place{font-size:17px;font-weight:800;line-height:1.3}.tour-year{display:block;font-size:12px;margin-top:5px;color:#8a6880}
@@ -73,7 +73,7 @@ a{color:inherit}
 <section class="tour" id="agenda-food-truck" aria-labelledby="tour-title">
 <div class="tour-head"><span class="tour-tag">🚚 Agenda do food truck</span>
 <h2 id="tour-title">Universo Donuts sobre rodas 🍩</h2>
-<p class="tour-desc">Nosso universo vai até você! Confira as próximas paradas.</p></div>
+<p class="tour-desc">Nosso universo vai até você! Confira onde estaremos nos próximos 7 dias.</p></div>
 <ol class="tour-list"><li class="tour-stop" data-date="2026-11-21"><time class="tour-date" datetime="2026-11-21"><span class="tour-day">21</span><span class="tour-month">NOV</span></time><div class="tour-info"><span class="tour-place">Green Park</span><span class="tour-year">2026</span><span class="tour-next-badge">⭐ Próxima parada</span></div></li>
 <li class="tour-stop" data-date="2026-12-04"><time class="tour-date" datetime="2026-12-04"><span class="tour-day">04</span><span class="tour-month">DEZ</span></time><div class="tour-info"><span class="tour-place">Buona Vita</span><span class="tour-year">2026</span><span class="tour-next-badge">⭐ Próxima parada</span></div></li>
 <li class="tour-stop" data-date="2026-12-19"><time class="tour-date" datetime="2026-12-19"><span class="tour-day">19</span><span class="tour-month">DEZ</span></time><div class="tour-info"><span class="tour-place">Green Park</span><span class="tour-year">2026</span><span class="tour-next-badge">⭐ Próxima parada</span></div></li>
@@ -89,7 +89,7 @@ a{color:inherit}
 <li class="tour-stop" data-date="2027-10-22"><time class="tour-date" datetime="2027-10-22"><span class="tour-day">22</span><span class="tour-month">OUT</span></time><div class="tour-info"><span class="tour-place">Damha 6</span><span class="tour-year">2027</span><span class="tour-next-badge">⭐ Próxima parada</span></div></li>
 <li class="tour-stop" data-date="2027-11-24"><time class="tour-date" datetime="2027-11-24"><span class="tour-day">24</span><span class="tour-month">NOV</span></time><div class="tour-info"><span class="tour-place">Damha 6</span><span class="tour-year">2027</span><span class="tour-next-badge">⭐ Próxima parada</span></div></li>
 <li class="tour-stop" data-date="2027-12-08"><time class="tour-date" datetime="2027-12-08"><span class="tour-day">08</span><span class="tour-month">DEZ</span></time><div class="tour-info"><span class="tour-place">Damha 6</span><span class="tour-year">2027</span><span class="tour-next-badge">⭐ Próxima parada</span></div></li></ol>
-<p class="tour-empty">Novas paradas em breve! Acompanhe nosso Instagram.</p>
+<p class="tour-empty">Nenhuma parada programada nos próximos 7 dias. Acompanhe as novidades no nosso Instagram.</p>
 <p class="tour-foot">Programação sujeita a alterações. Confira as novidades no nosso Instagram.</p>
 </section>
 <section class="location" aria-labelledby="location-title">
@@ -106,14 +106,19 @@ a{color:inherit}
 <script>
 (function(){
   const now = new Date();
-  const today = [now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const end = new Date(today);
+  end.setDate(end.getDate() + 7);
+  const localDay = date => [date.getFullYear(), String(date.getMonth()+1).padStart(2,'0'), String(date.getDate()).padStart(2,'0')].join('-');
+  const from = localDay(today);
+  const through = localDay(end);
   const entries = Array.from(document.querySelectorAll('.tour-stop'));
-  const future = entries.filter(item => {
-    const upcoming = item.dataset.date >= today;
-    if (!upcoming) item.hidden = true;
-    return upcoming;
+  const visible = entries.filter(item => {
+    const withinSevenDays = item.dataset.date >= from && item.dataset.date <= through;
+    item.hidden = !withinSevenDays;
+    return withinSevenDays;
   });
-  if (future.length) future[0].classList.add('is-next');
+  if (visible.length) visible[0].classList.add('is-next');
   else document.querySelector('.tour-empty').style.display='block';
 })();
 </script>
